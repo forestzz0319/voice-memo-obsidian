@@ -28,5 +28,5 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 - 整形ロジックは `../voice-translator/lib/buildPrompt.js` を土台にする
 
 ## Blockers
-- この作業PCでは `git` コマンドが見つからず、仕様書をコミットできていない（git init未実施）。
-  GitHub Pages公開にもgitが必要なので、Git for Windowsの導入かPATH設定を確認すること。
+- なし（2026-10-02 Git for Windows 2.56.0 導入、リポジトリ初期化・初回コミット済み）。
+  別PCで作業する場合はそのPCにもGitが必要。
