@@ -82,16 +82,26 @@ export function createRecognizer(opts) {
   function spawn() {
     const r = new Impl();
     r.lang = 'ja-JP';
-    r.continuous = true;
+    // Android Chrome は continuous: true だと同じ確定結果を何度も送ってくるため、
+    // 1発話ごとに終了させ、onend の自動再開でつなぐ。
+    r.continuous = false;
     r.interimResults = true;
+    const emitted = new Set(); // このインスタンスで確定済みの結果の位置
+    let lastFinal = ''; // 同じ文が別の位置で再送される機種への備え
 
     r.onresult = (e) => {
       let interim = '';
-      for (let i = e.resultIndex; i < e.results.length; i++) {
+      for (let i = 0; i < e.results.length; i++) {
         const res = e.results[i];
         const t = res[0].transcript;
         if (res.isFinal) {
-          if (t.trim()) onFinal(t.trim());
+          if (emitted.has(i)) continue;
+          emitted.add(i);
+          const text = t.trim();
+          if (text && text !== lastFinal) {
+            lastFinal = text;
+            onFinal(text);
+          }
         } else {
           interim += t;
         }

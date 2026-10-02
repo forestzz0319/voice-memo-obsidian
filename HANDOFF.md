@@ -1,6 +1,6 @@
 # HANDOFF — voice-memo-obsidian
 
-最終更新: 2026-10-02T21:00+09:00
+最終更新: 2026-10-02T22:00+09:00
 
 ## Goal
 Androidで話した短い音声メモを、フィラー除去・医療用語補正してリアルタイムに整形し、
@@ -14,7 +14,7 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 ## Completed
 - 設計: `docs/superpowers/specs/2026-10-02-voice-memo-obsidian-design.md`
 - 計画: `docs/superpowers/plans/2026-10-02-voice-memo-obsidian-plan.md`
-- 純粋関数モジュールと単体テスト: obsidian.js / note.js / prompt.js / settings.js / formatter.js（speech.js含め計42件成功）
+- 純粋関数モジュールと単体テスト: obsidian.js / note.js / prompt.js / settings.js / formatter.js（speech.js含め計46件成功）
 - 画面: index.html / style.css / app.js、音声認識 speech.js、PWA manifest.json / sw.js / icons
 - PCのヘッドレスChromeで通し確認（API応答は偽物に差し替え）: 原文入力→ストリーミング整形表示、
   手動編集で自動整形停止・再整形ボタン表示、リクエスト内容（モデル・effort・fallbacks・辞書）、Service Worker有効化
@@ -49,6 +49,7 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 - 整形結果はタイトル・タグ・本文の3欄に分けて表示し、どれかを手で編集したら自動整形を止める
 - 2026-10-02 実機フィードバックで変更: Chromeが無音で認識を終了しても🎤で止めるまで自動再開し、最大3分（経過時間を表示）。
   終了時に確定前の途中結果は原文に取り込む。ヘッダーの「新規」を「🗑 削除」に変更（確認後に全欄クリア）。sw.js VERSION v2
+- 2026-10-02 実機で同じ文が5回ほど重複入力される不具合: Android Chromeのcontinuous:trueの既知不具合。continuous:falseにして自動再開でつなぎ、確定結果の位置と直前の文で重複除去。sw.js VERSION v3
 - 患者の個人情報は話さない運用（画面に注意書き）
 
 ## Blockers

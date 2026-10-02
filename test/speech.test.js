@@ -138,6 +138,44 @@ test('経過時間を1秒ごとに通知する', () => {
   assert.deepEqual(log.ticks.slice(0, 4), [0, 1000, 2000, 3000]);
 });
 
+test('Android Chrome のように同じ確定結果が何度も届いても1回だけ追加する', () => {
+  const { r, instances, log } = setup();
+  r.start();
+  const rec = instances[0];
+  const final = [{ transcript: 'これはテストです' }];
+  final.isFinal = true;
+  for (let k = 0; k < 5; k++) rec.onresult({ resultIndex: 0, results: [final] });
+  assert.deepEqual(log.finals, ['これはテストです']);
+});
+
+test('同じ認識の中で2つ目の確定結果は追加される', () => {
+  const { r, instances, log } = setup();
+  r.start();
+  const a = [{ transcript: '一文目' }]; a.isFinal = true;
+  const b = [{ transcript: '二文目' }]; b.isFinal = true;
+  instances[0].onresult({ resultIndex: 0, results: [a] });
+  instances[0].onresult({ resultIndex: 1, results: [a, b] });
+  instances[0].onresult({ resultIndex: 0, results: [a, b] }); // 重複して届く
+  assert.deepEqual(log.finals, ['一文目', '二文目']);
+});
+
+test('同じ文が別の位置に再送されても追加しない', () => {
+  const { r, instances, log } = setup();
+  r.start();
+  const a = [{ transcript: 'これはテストです' }]; a.isFinal = true;
+  instances[0].onresult({ resultIndex: 0, results: [a] });
+  instances[0].onresult({ resultIndex: 1, results: [a, a] });
+  assert.deepEqual(log.finals, ['これはテストです']);
+});
+
+test('連続認識モードは使わない（Androidの重複不具合を避ける）', () => {
+  const { r, instances } = setup();
+  r.start();
+  assert.equal(instances[0].continuous, false);
+  assert.equal(instances[0].interimResults, true);
+  assert.equal(instances[0].lang, 'ja-JP');
+});
+
 test('非対応ブラウザでは isSupported: false', () => {
   const r = createRecognizer({ Impl: null, onInterim() {}, onFinal() {}, onStateChange() {}, onError() {} });
   assert.equal(r.isSupported, false);
