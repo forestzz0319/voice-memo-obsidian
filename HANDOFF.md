@@ -1,32 +1,51 @@
 # HANDOFF — voice-memo-obsidian
 
-最終更新: 2026-10-02T00:00+09:00
+最終更新: 2026-10-02T18:00+09:00
 
 ## Goal
 Androidで話した短い音声メモを、フィラー除去・医療用語補正してリアルタイムに整形し、
 ボタン1つでObsidian（保管庫 forest）に新規ノートとして作成するPWA。
 
 ## Current state
-設計完了・ユーザー承認済み。仕様書のユーザーレビュー待ち → 次は実装計画作成。コードは未着手。
+実装計画のタスク1〜9（コード・PWA化）完了。タスク10（公開・Android実機確認）は未着手で、
+公開先の決定（GitHub Pages など）をユーザーに確認待ち。
 
 ## Completed
-- 設計仕様: `docs/superpowers/specs/2026-10-02-voice-memo-obsidian-design.md`
+- 設計: `docs/superpowers/specs/2026-10-02-voice-memo-obsidian-design.md`
+- 計画: `docs/superpowers/plans/2026-10-02-voice-memo-obsidian-plan.md`
+- 純粋関数モジュールと単体テスト: obsidian.js / note.js / prompt.js / settings.js / formatter.js（計33件成功）
+- 画面: index.html / style.css / app.js、音声認識 speech.js、PWA manifest.json / sw.js / icons
+- PCのヘッドレスChromeで通し確認（API応答は偽物に差し替え）: 原文入力→ストリーミング整形表示、
+  手動編集で自動整形停止・再整形ボタン表示、リクエスト内容（モデル・effort・fallbacks・辞書）、Service Worker有効化
 
 ## Next steps
-1. ユーザーが仕様書を確認・承認
-2. 実装計画を作成 → 実装（純粋関数モジュールからTDD）
-3. GitHub Pagesで公開、Android実機で手動確認
+1. 公開先を決めて公開（HTTPS必須。GitHub Pagesなら公開リポジトリ。APIキーはコードに含まれない）
+2. Anthropic Console で本アプリ専用APIキーを作成（利用上限を設定推奨）
+3. Android実機チェック:
+   1. ChromeでURLを開き「ホーム画面に追加」して起動
+   2. ⚙ でAPIキー・保管庫名 `forest`・フォルダ `00_Inbox` を保存
+   3. 「えーと、へバーデン決説の患者さんで、あのー、DIP関節の…」と話して補正を確認
+   4. 話しながらプレビューが更新される
+   5. 本文を手で直すと自動上書きされない／「再整形」で戻る
+   6. 「Obsidianへ」→ forest/00_Inbox にノート作成、frontmatter・タグ・折りたたみ原文を確認
+   7. 同じタイトルで2回保存したときの挙動を記録
+4. sw.js の `VERSION` はファイル更新時に上げる
 
 ## Verification
-- 単体テスト（実装後）: `node --test test/`
+- 単体テスト: `npm test`（Node.js 20以上）
+- PCでの画面確認: `npx --yes http-server -p 8080 -c-1` → Chrome で http://localhost:8080
+- 未確認: 実際のマイク認識、実APIでの整形品質、Androidでの obsidian:// 起動（実機が必要なため）
+
+## Important files
+- `app.js` 画面の結線 / `formatter.js` Claude呼び出し / `prompt.js` 整形指示 / `note.js` ノート組み立て / `obsidian.js` URL生成
 
 ## Decisions
 - サーバーなし静的PWA、APIキーは端末localStorageのみ（本人専用のため）
-- 音声認識はChrome内蔵Web Speech API、1文確定ごとに約1秒デバウンスして原文全体を再整形
-- モデル既定 claude-opus-5-5（effort low）、設定でSonnet 5.5に切替可
-- 患者の個人情報は話さない運用
-- 整形ロジックは `../voice-translator/lib/buildPrompt.js` を土台にする
+- 音声認識はChrome内蔵Web Speech API、確定ごとに1秒デバウンスして原文全体を再整形
+- モデル既定 claude-opus-5-5（effort low）、設定でSonnet 5.5に切替可。`fallbacks: "default"` で拒否時に自動振り替え
+- SDKは jsDelivr の `@anthropic-ai/sdk@0.131.0/+esm` をバージョン固定で読み込む
+- 整形結果はタイトル・タグ・本文の3欄に分けて表示し、どれかを手で編集したら自動整形を止める
+- 患者の個人情報は話さない運用（画面に注意書き）
 
 ## Blockers
-- なし（2026-10-02 Git for Windows 2.56.0 導入、リポジトリ初期化・初回コミット済み）。
-  別PCで作業する場合はそのPCにもGitが必要。
+- なし。別PCで作業する場合はGitとNode.jsが必要（このPCは 2026-10-02 に winget で Node.js LTS 24.19.0 を導入済み）。

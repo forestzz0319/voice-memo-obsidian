@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#2f6f5e">
+  <title>音声メモ→Obsidian</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>音声メモ</h1>
+    <button id="btn-new" class="ghost" type="button">新規</button>
+    <button id="btn-settings" class="ghost" type="button" aria-label="設定">⚙</button>
+  </header>
+
+  <main>
+    <section class="raw">
+      <label for="raw">原文</label>
+      <textarea id="raw" rows="3" placeholder="🎤を押して話すか、ここに入力"></textarea>
+      <p id="interim" class="interim" aria-live="polite"></p>
+    </section>
+
+    <section class="preview">
+      <div class="preview-head">
+        <span>整形結果</span>
+        <button id="btn-reformat" class="ghost small" type="button" hidden>再整形</button>
+      </div>
+      <input id="title" type="text" placeholder="タイトル" autocomplete="off">
+      <input id="tags" type="text" placeholder="タグ（カンマ区切り）" autocomplete="off">
+      <textarea id="body" rows="10" placeholder="話すとここに整形された文章が出ます"></textarea>
+    </section>
+
+    <p id="status" class="status" aria-live="polite"></p>
+    <p class="notice">患者さんの氏名・ID・生年月日などは話さないでください（内容はClaude APIに送信されます）。</p>
+  </main>
+
+  <footer class="actions">
+    <button id="btn-copy" class="secondary" type="button">コピー</button>
+    <button id="btn-mic" class="mic" type="button" aria-label="録音開始">🎤</button>
+    <button id="btn-save" class="primary" type="button">Obsidianへ</button>
+  </footer>
+
+  <dialog id="settings">
+    <form method="dialog" id="settings-form">
+      <h2>設定</h2>
+      <label>Anthropic APIキー
+        <input name="apiKey" type="password" autocomplete="off" placeholder="sk-ant-...">
+      </label>
+      <label>モデル
+        <select name="model"></select>
+      </label>
+      <label>Obsidian 保管庫名
+        <input name="vault" type="text" autocomplete="off">
+      </label>
+      <label>保存フォルダ
+        <input name="folder" type="text" autocomplete="off" placeholder="00_Inbox">
+      </label>
+      <label>ユーザー辞書（1行1件。「誤 → 正」または正しい語）
+        <textarea name="dictionary" rows="5" placeholder="へバーデン決説 → ヘバーデン結節&#10;ロコモティブシンドローム"></textarea>
+      </label>
+      <label>タグ候補（カンマ区切り）
+        <input name="tagCandidates" type="text" autocomplete="off" placeholder="YouTubeネタ, note, 肩, 膝">
+      </label>
+      <p class="hint">APIキーはこのスマホのブラウザ内にだけ保存されます。</p>
+      <div class="row">
+        <button type="button" id="btn-export" class="ghost small">設定を書き出す</button>
+        <label class="ghost small file-btn">設定を読み込む
+          <input type="file" id="import-file" accept="application/json,.json" hidden>
+        </label>
+      </div>
+      <div class="row end">
+        <button value="cancel" class="secondary" type="submit" formnovalidate>閉じる</button>
+        <button value="save" class="primary" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
