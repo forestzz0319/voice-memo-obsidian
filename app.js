@@ -14,8 +14,8 @@ const $ = (id) => document.getElementById(id);
 const el = {
   raw: $('raw'), interim: $('interim'),
   title: $('title'), tags: $('tags'), body: $('body'),
-  status: $('status'), mic: $('btn-mic'), save: $('btn-save'), copy: $('btn-copy'),
-  reformat: $('btn-reformat'), newMemo: $('btn-new'), openSettings: $('btn-settings'),
+  status: $('status'), recTime: $('rec-time'), mic: $('btn-mic'), save: $('btn-save'), copy: $('btn-copy'),
+  reformat: $('btn-reformat'), clear: $('btn-clear'), openSettings: $('btn-settings'),
   dialog: $('settings'), form: $('settings-form'),
   exportBtn: $('btn-export'), importFile: $('import-file'),
 };
@@ -83,18 +83,29 @@ function requestFormat({ immediate = false } = {}) {
 
 // ---------- 音声認識 ----------
 
+const MAX_RECORD_MS = 3 * 60 * 1000;
+const fmtTime = (ms) => `${Math.floor(ms / 60000)}:${String(Math.floor((ms % 60000) / 1000)).padStart(2, '0')}`;
+let lastElapsed = 0;
+
 const recognizer = createRecognizer({
+  maxDurationMs: MAX_RECORD_MS,
   onInterim: (t) => { el.interim.textContent = t; },
   onFinal: (t) => {
     el.raw.value = el.raw.value ? `${el.raw.value}\n${t}` : t;
     requestFormat();
   },
+  onTick: (ms) => {
+    lastElapsed = ms;
+    el.recTime.textContent = `● 録音中 ${fmtTime(ms)} / ${fmtTime(MAX_RECORD_MS)}`;
+  },
   onStateChange: (listening) => {
     el.mic.classList.toggle('on', listening);
     el.mic.setAttribute('aria-label', listening ? '録音停止' : '録音開始');
     el.mic.textContent = listening ? '■' : '🎤';
-    if (listening) setStatus('聞き取り中…');
-    else if (el.status.textContent === '聞き取り中…') setStatus('');
+    el.recTime.hidden = !listening;
+    if (!listening && lastElapsed >= MAX_RECORD_MS) {
+      setStatus('3分に達したので録音を終了しました。続けるには🎤を押してください。');
+    }
   },
   onError: (m) => setStatus(m, true),
 });
@@ -129,8 +140,8 @@ el.reformat.addEventListener('click', () => {
   requestFormat({ immediate: true });
 });
 
-el.newMemo.addEventListener('click', () => {
-  if (hasContent() && !confirm('今のメモを消して新しく始めますか？')) return;
+el.clear.addEventListener('click', () => {
+  if (hasContent() && !confirm('原文・タイトル・タグ・本文をすべて削除しますか？')) return;
   formatter?.cancel();
   recognizer.stop();
   el.raw.value = '';

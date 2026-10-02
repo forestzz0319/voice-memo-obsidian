@@ -12,7 +12,7 @@
 <body>
   <header class="bar">
     <h1>音声メモ</h1>
-    <button id="btn-new" class="ghost" type="button">新規</button>
+    <button id="btn-clear" class="ghost" type="button">🗑 削除</button>
     <button id="btn-settings" class="ghost" type="button" aria-label="設定">⚙</button>
   </header>
 
@@ -37,6 +37,7 @@
     <p class="notice">患者さんの氏名・ID・生年月日などは話さないでください（内容はClaude APIに送信されます）。</p>
   </main>
 
+  <p id="rec-time" class="rec-time" aria-live="off" hidden></p>
   <footer class="actions">
     <button id="btn-copy" class="secondary" type="button">コピー</button>
     <button id="btn-mic" class="mic" type="button" aria-label="録音開始">🎤</button>
