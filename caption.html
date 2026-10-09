@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>説明字幕</title>
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="caption.css">
+</head>
+<body>
+  <header class="bar">
+    <button id="btn-toggle" class="primary" type="button">▶ 開始</button>
+    <div class="size" role="group" aria-label="文字の大きさ">
+      <button type="button" data-size="large">大</button>
+      <button type="button" data-size="xlarge">特大</button>
+    </div>
+    <button id="btn-clear" class="ghost" type="button">クリア</button>
+    <span id="status" class="status" aria-live="polite"></span>
+    <button id="btn-settings" class="ghost" type="button" aria-label="設定">⚙</button>
+  </header>
+
+  <main id="captions" class="captions" aria-live="polite">
+    <p id="placeholder" class="placeholder">「▶ 開始」を押して話すと、ここに字幕が出ます。</p>
+    <p id="interim" class="line interim"></p>
+  </main>
+
+  <footer class="notice">話した内容は文字の補正のためClaude APIに送信されます。氏名など個人が分かる情報は話さないでください。字幕は保存されません。</footer>
+
+  <dialog id="settings">
+    <form method="dialog" id="settings-form">
+      <h2>設定</h2>
+      <label>Anthropic APIキー
+        <input name="apiKey" type="password" autocomplete="off" placeholder="sk-ant-...">
+      </label>
+      <label>モデル
+        <select name="model"></select>
+      </label>
+      <label>ユーザー辞書（1行1件。「誤 → 正」または正しい語）
+        <textarea name="dictionary" rows="6" placeholder="こつそしょう → 骨粗鬆症&#10;ロキソプロフェン"></textarea>
+      </label>
+      <p class="hint">設定はこのPCのブラウザ内に保存され、音声メモのページと共通です。</p>
+      <div class="row">
+        <button value="cancel" class="ghost" type="submit" formnovalidate>閉じる</button>
+        <button value="save" class="primary" type="submit">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="caption.js"></script>
+</body>
+</html>

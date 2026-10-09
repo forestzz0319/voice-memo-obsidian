@@ -176,6 +176,17 @@ test('連続認識モードは使わない（Androidの重複不具合を避け�
   assert.equal(instances[0].lang, 'ja-JP');
 });
 
+test('continuous: true を指定でき、最大時間 Infinity なら止まらない', () => {
+  const { r, instances, clock } = setup({ continuous: true, maxDurationMs: Infinity });
+  r.start();
+  assert.equal(instances[0].continuous, true);
+  clock.advance(60 * 60 * 1000);
+  assert.equal(r.listening, true);
+  instances[0].end();
+  clock.advance(300);
+  assert.equal(instances.length, 2);
+});
+
 test('非対応ブラウザでは isSupported: false', () => {
   const r = createRecognizer({ Impl: null, onInterim() {}, onFinal() {}, onStateChange() {}, onError() {} });
   assert.equal(r.isSupported, false);

@@ -1,6 +1,6 @@
 # HANDOFF — voice-memo-obsidian
 
-最終更新: 2026-10-02T22:00+09:00
+最終更新: 2026-10-09T12:00+09:00
 
 ## Goal
 Androidで話した短い音声メモを、フィラー除去・医療用語補正してリアルタイムに整形し、
@@ -14,7 +14,7 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 ## Completed
 - 設計: `docs/superpowers/specs/2026-10-02-voice-memo-obsidian-design.md`
 - 計画: `docs/superpowers/plans/2026-10-02-voice-memo-obsidian-plan.md`
-- 純粋関数モジュールと単体テスト: obsidian.js / note.js / prompt.js / settings.js / formatter.js（speech.js含め計46件成功）
+- 純粋関数モジュールと単体テスト: obsidian.js / note.js / prompt.js / settings.js / formatter.js（字幕ページ含め計57件成功）
 - 画面: index.html / style.css / app.js、音声認識 speech.js、PWA manifest.json / sw.js / icons
 - PCのヘッドレスChromeで通し確認（API応答は偽物に差し替え）: 原文入力→ストリーミング整形表示、
   手動編集で自動整形停止・再整形ボタン表示、リクエスト内容（モデル・effort・fallbacks・辞書）、Service Worker有効化
@@ -54,3 +54,10 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 
 ## Blockers
 - なし。別PCで作業する場合はGitとNode.jsが必要（このPCは 2026-10-02 に winget で Node.js LTS 24.19.0 を導入済み）。
+
+## 追加: 説明字幕ページ（2026-10-09）
+- 公開URL: https://forestzz0319.github.io/voice-memo-obsidian/caption.html （診察室PCのChromeで開く）
+- 設計: `docs/superpowers/specs/2026-10-09-caption-page-design.md`
+- ファイル: caption.html / caption.css / caption.js / captioner.js / caption-prompt.js、speech.js に continuous オプション追加
+- 確認済み: 単体テスト、ヘッドレスChromeで偽音声認識＋偽API応答の通し確認
+- 未確認（診察室PCで要確認）: 実マイクでの認識、補正の質と速さ、文字の大きさが患者さんから読めるか、画面スリープ防止

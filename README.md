@@ -33,3 +33,12 @@ PCで動作確認する場合は、このフォルダで簡易サーバーを立
 ```
 npx --yes http-server -p 8080 -c-1
 ```
+
+## 説明字幕（PC用）
+
+診察室のPCで、レントゲンや薬の説明を大きな字幕にして耳の不自由な方に読んでもらうページです。
+Google Chrome で `caption.html`（公開URLの末尾に `caption.html`）を開き、「▶ 開始」で話します。
+話している途中の文字がすぐ表示され、1文ごとにClaudeが医療用語の補正とフィラー除去をした文に差し替わります。
+APIキー・モデル・ユーザー辞書は ⚙ 設定（音声メモのページと共通）。字幕は保存されません。
+
+設計: [`docs/superpowers/specs/2026-10-09-caption-page-design.md`](docs/superpowers/specs/2026-10-09-caption-page-design.md)

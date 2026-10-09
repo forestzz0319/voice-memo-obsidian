@@ -14,7 +14,8 @@ const FATAL_ERRORS = new Set(['not-allowed', 'service-not-allowed', 'audio-captu
  *   onStateChange: (listening: boolean) => void,
  *   onError: (message: string) => void,
  *   onTick?: (elapsedMs: number) => void,  // 録音中、1秒ごとに経過時間
- *   maxDurationMs?: number,
+ *   maxDurationMs?: number,  // Infinity で無制限
+ *   continuous?: boolean,    // PC向け。Androidでは重複不具合があるため false のままにする
  *   Impl?: any, now?: () => number, setTimer?: typeof setTimeout, clearTimer?: typeof clearTimeout,
  * }} opts
  */
@@ -23,6 +24,7 @@ export function createRecognizer(opts) {
     onInterim, onFinal, onStateChange, onError,
     onTick = () => {},
     maxDurationMs = DEFAULT_MAX_MS,
+    continuous = false,
     now = () => Date.now(),
     setTimer = setTimeout,
     clearTimer = clearTimeout,
@@ -83,8 +85,8 @@ export function createRecognizer(opts) {
     const r = new Impl();
     r.lang = 'ja-JP';
     // Android Chrome は continuous: true だと同じ確定結果を何度も送ってくるため、
-    // 1発話ごとに終了させ、onend の自動再開でつなぐ。
-    r.continuous = false;
+    // 既定では1発話ごとに終了させ、onend の自動再開でつなぐ（PCの字幕ページは true）。
+    r.continuous = continuous;
     r.interimResults = true;
     const emitted = new Set(); // このインスタンスで確定済みの結果の位置
     let lastFinal = ''; // 同じ文が別の位置で再送される機種への備え
