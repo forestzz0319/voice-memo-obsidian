@@ -1,6 +1,6 @@
 // 画面ファイルだけをキャッシュする。API・CDN への通信は素通し。
 // ファイルを変更して公開するときは VERSION を上げること。
-const VERSION = 'v4';
+const VERSION = 'v5';
 const CACHE = `voice-memo-${VERSION}`;
 const FILES = [
   './', 'index.html', 'style.css', 'app.js', 'speech.js', 'formatter.js',

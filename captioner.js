@@ -15,7 +15,7 @@ const MAX_TOKENS = 1000;
  * }} opts
  */
 export function createCaptioner({ Anthropic, getSettings, onUpdate, onError }) {
-  /** @type {{id: number, raw: string, fixed: string|null}[]} */
+  /** @type {{id: number, raw: string, fixed: string|null, edited?: boolean}[]} */
   let lines = [];
   let nextId = 1;
   let generation = 0; // clear() のたびに増やし、古い結果を捨てる
@@ -59,7 +59,7 @@ export function createCaptioner({ Anthropic, getSettings, onUpdate, onError }) {
         system: buildCaptionSystemPrompt({ dictionary: parseDictionary(s.dictionary) }),
         messages: [{ role: 'user', content: buildCaptionUserMessage({ context, sentence: line.raw }) }],
       });
-      if (gen !== generation) return;
+      if (gen !== generation || line.edited) return;
       if (res.stop_reason === 'refusal') return;
       const text = res.content
         .filter((b) => b.type === 'text')
@@ -78,6 +78,14 @@ export function createCaptioner({ Anthropic, getSettings, onUpdate, onError }) {
     }
   }
 
+  /** 利用者が手で直した文。以後この行はAIの補正で上書きせず、文脈にもこの文を使う。 */
+  function edit(id, text) {
+    const line = lines.find((l) => l.id === id);
+    if (!line) return;
+    line.fixed = text;
+    line.edited = true;
+  }
+
   function clear() {
     generation++;
     lines = [];
@@ -88,7 +96,7 @@ export function createCaptioner({ Anthropic, getSettings, onUpdate, onError }) {
     while (inflight.size > 0) await Promise.allSettled([...inflight]);
   }
 
-  return { add, clear, idle };
+  return { add, edit, clear, idle };
 }
 
 /** 空や、入力より極端に長い出力（付け足しの疑い）は採用しない */

@@ -25,7 +25,10 @@ function setStatus(text, isError = false) {
 
 const lineEls = new Map();
 
+let editing = null; // 手で修正中の行 {p, id, original, pendingAi}
+
 function scrollToBottom() {
+  if (editing) return; // 修正中は画面を動かさない
   el.captions.scrollTop = el.captions.scrollHeight;
 }
 
@@ -34,6 +37,8 @@ function addLine(id, text) {
   const p = document.createElement('p');
   p.className = 'line';
   p.textContent = text;
+  p.title = 'クリックするとキーボードで直せます';
+  p.addEventListener('click', (e) => startEdit(p, id, e));
   el.captions.insertBefore(p, el.interim);
   lineEls.set(id, p);
   scrollToBottom();
@@ -41,12 +46,67 @@ function addLine(id, text) {
 
 function replaceLine(id, text) {
   const p = lineEls.get(id);
-  if (!p) return;
+  if (!p || p.classList.contains('edited')) return;
+  if (editing?.p === p) {
+    editing.pendingAi = text; // 修正を取り消したときに使う
+    return;
+  }
   p.textContent = text;
   p.classList.remove('fixed');
   void p.offsetWidth; // アニメーションをやり直す
   p.classList.add('fixed');
 }
+
+// ---------- 手で修正 ----------
+
+function startEdit(p, id, e) {
+  if (editing?.p === p) return;
+  if (editing) finishEdit(true);
+  editing = { p, id, original: p.textContent, pendingAi: null };
+  p.contentEditable = 'plaintext-only';
+  p.classList.add('editing');
+  p.focus();
+  // クリックした位置にカーソルを置く
+  const range = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+  if (range && p.contains(range.startContainer)) {
+    const sel = getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+}
+
+function finishEdit(save) {
+  if (!editing) return;
+  const { p, id, original, pendingAi } = editing;
+  editing = null;
+  p.contentEditable = 'false';
+  p.classList.remove('editing');
+  const text = p.textContent.replace(/\s*\n\s*/g, ' ').trim();
+  if (save && text && text !== original) {
+    p.textContent = text;
+    p.classList.add('edited');
+    p.title = '手で修正した行';
+    if (typeof id === 'number') captioner?.edit(id, text);
+  } else {
+    p.textContent = original;
+    if (pendingAi) replaceLine(id, pendingAi);
+  }
+  scrollToBottom();
+}
+
+el.captions.addEventListener('keydown', (e) => {
+  if (!editing || e.isComposing) return; // 日本語変換中のEnterは確定に使わない
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    finishEdit(true);
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    finishEdit(false);
+  }
+});
+el.captions.addEventListener('focusout', (e) => {
+  if (editing && e.target === editing.p) finishEdit(true);
+});
 
 // ---------- 補正 ----------
 
@@ -128,6 +188,7 @@ el.toggle.addEventListener('click', () => {
 });
 
 el.clear.addEventListener('click', () => {
+  editing = null;
   captioner?.clear();
   for (const p of lineEls.values()) p.remove();
   lineEls.clear();

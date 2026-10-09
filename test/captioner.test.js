@@ -88,6 +88,27 @@ test('APIキー未設定なら呼ばずに通知', async () => {
   assert.match(errors[0], /APIキー/);
 });
 
+test('手で直した行は、後から届いた補正で上書きしない', async () => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const { c, updates } = setup(async () => { await gate; return textReply('AIの補正'); });
+  const id = c.add('まちがい');
+  c.edit(id, '手で直した文');
+  release();
+  await c.idle();
+  assert.deepEqual(updates, []);
+});
+
+test('手で直した文を次の文の文脈に使う', async () => {
+  const { c, calls } = setup(() => textReply('補正。'));
+  const id = c.add('一');
+  await c.idle();
+  c.edit(id, '手で直した一');
+  c.add('二');
+  await c.idle();
+  assert.match(calls[1].params.messages[0].content, /<直前の発言（参考）>\n手で直した一\n/);
+});
+
 test('clear() 後に返ってきた結果は捨てる', async () => {
   let release;
   const gate = new Promise((r) => { release = r; });
