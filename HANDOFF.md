@@ -1,6 +1,6 @@
 # HANDOFF — voice-memo-obsidian
 
-最終更新: 2026-10-09T15:00+09:00
+最終更新: 2026-10-26T12:00+09:00
 
 ## Goal
 Androidで話した短い音声メモを、フィラー除去・医療用語補正してリアルタイムに整形し、
@@ -60,5 +60,6 @@ Androidで話した短い音声メモを、フィラー除去・医療用語補�
 - 設計: `docs/superpowers/specs/2026-10-09-caption-page-design.md`
 - ファイル: caption.html / caption.css / caption.js / captioner.js / caption-prompt.js、speech.js に continuous オプション追加
 - 字幕の手修正: 行をクリック→キーボードで修正（Enter確定・Esc取消、IME変換中のEnterは無視）。修正した行はAI補正で上書きせず、次の文の文脈にも修正文を使う（captioner.edit）。sw.js VERSION v5
+- 2026-10-26 決定: APIキーはPCごとにChromeへ1回入力する方式のまま（voice-translatorのようにOneDriveの.envで共有する案は不採用）。
 - 確認済み: 単体テスト、ヘッドレスChromeで偽音声認識＋偽API応答の通し確認
 - 未確認（診察室PCで要確認）: 実マイクでの認識、補正の質と速さ、文字の大きさが患者さんから読めるか、画面スリープ防止
